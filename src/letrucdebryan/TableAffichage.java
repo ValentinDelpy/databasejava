@@ -8,6 +8,7 @@ package letrucdebryan;
 import java.awt.BorderLayout;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -32,7 +33,7 @@ public class TableAffichage extends JFrame {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/champions", "root", null);
-//here sonoo is database name, root is username and password  
+            insertData("amaury", 600, "mage noir", "midlaner");
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("select * from champions");
             ResultSetMetaData resultMeta = rs.getMetaData();
@@ -41,7 +42,6 @@ public class TableAffichage extends JFrame {
                 columnNames[i - 1] = resultMeta.getColumnName(i);
             }
 
-            
             ArrayList<Object[]> data = new ArrayList<>();
             while (rs.next()) {
                 Object[] line = new Object[resultMeta.getColumnCount()]; // on créé un tableau pour stocker la ligne courante
@@ -57,5 +57,29 @@ public class TableAffichage extends JFrame {
         }
         getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
         pack();
+    }
+
+    public void insertData(String name, int hp, String type, String role) {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/champions", "root", null);
+            String query = " insert into champions (name, health_points, type, role)"
+                    + " values (?, ?, ?, ?)";
+            PreparedStatement preparedStmt = con.prepareStatement(query);
+            preparedStmt.setString(1, name);
+            preparedStmt.setInt(2, hp);
+            preparedStmt.setString(3, type);
+            preparedStmt.setString(4, role);
+
+            // execute the java preparedstatement
+            preparedStmt.executeUpdate();
+
+            con.close();
+            System.out.println("Data ajouté");
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
     }
 }
